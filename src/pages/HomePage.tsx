@@ -206,7 +206,7 @@ export default function HomePage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              Why Choose Lovable Greens?
+              Why Choose Healthy Greens?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               We're not just delivering food. We're delivering a healthier lifestyle.
