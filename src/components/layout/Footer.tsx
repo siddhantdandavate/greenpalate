@@ -67,7 +67,7 @@ export function Footer() {
               <div className="w-10 h-10 rounded-full bg-primary-foreground flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-primary" />
               </div>
-              <span className="font-display text-xl font-bold">Lovable Greens</span>
+              <span className="font-display text-xl font-bold">Healthy Greens</span>
             </Link>
             <p className="text-primary-foreground/70 mb-6 max-w-sm">
               Taste Meets Wellness in Every Bowl. Fresh, nutritious meals delivered to your doorstep.
@@ -79,7 +79,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4" />
-                <span>hello@lovablegreens.com</span>
+                <span>hello@healthygreens.com</span>
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4" />
@@ -143,7 +143,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 Lovable Greens. All rights reserved.
+            © 2024 Healthy Greens. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             {socialLinks.map((social) => (

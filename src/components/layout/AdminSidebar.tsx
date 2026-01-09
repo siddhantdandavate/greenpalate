@@ -99,7 +99,7 @@ export function AdminSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-display font-bold text-sm">Lovable Greens</span>
+              <span className="font-display font-bold text-sm">Healthy Greens</span>
               <span className="text-xs text-muted-foreground">Admin Console</span>
             </div>
           )}

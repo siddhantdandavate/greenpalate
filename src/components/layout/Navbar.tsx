@@ -38,7 +38,7 @@ export function Navbar({ cartItemCount = 0 }: NavbarProps) {
               <Leaf className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="font-display text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-              Lovable Greens
+              Healthy Greens
             </span>
           </Link>
 
