@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   User,
   MapPin,
@@ -13,24 +13,15 @@ import {
   Plus,
   Calendar,
   Pause,
-  Play,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
-
-const mockUser = {
-  name: "Priya Sharma",
-  email: "priya.sharma@email.com",
-  phone: "+91 98765 43210",
-  avatar: "https://i.pravatar.cc/100?img=1",
-  memberSince: "January 2024",
-};
+import { useApp } from "@/contexts/AppContext";
 
 const mockAddresses = [
   {
@@ -51,47 +42,45 @@ const mockAddresses = [
   },
 ];
 
-const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    date: "Jan 15, 2024",
-    items: ["Mediterranean Quinoa Bowl", "Green Detox Bowl"],
-    total: 648,
-    status: "Delivered",
-  },
-  {
-    id: "ORD-2024-002",
-    date: "Jan 12, 2024",
-    items: ["Grilled Chicken Power Bowl", "Salmon Poke Bowl"],
-    total: 998,
-    status: "Delivered",
-  },
-  {
-    id: "ORD-2024-003",
-    date: "Jan 10, 2024",
-    items: ["Buddha Bowl", "Asian Tofu Stir-Fry"],
-    total: 628,
-    status: "Delivered",
-  },
-];
-
-const mockSubscription = {
-  id: "SUB-2024-001",
-  plan: "Monthly Plan",
-  mealPlan: "Balanced",
-  price: 8999,
-  startDate: "Jan 1, 2024",
-  nextDelivery: "Jan 18, 2024",
-  status: "Active",
-  deliveryDays: ["Monday", "Wednesday", "Friday"],
-  mealsPerDay: 3,
-};
-
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile");
+  const { user, isAuthenticated, logout, orders, subscriptions } = useApp();
+  const navigate = useNavigate();
+
+  // Filter orders for current user
+  const userOrders = orders.filter(order => 
+    !user || order.customerId === user.id || order.customerEmail === user?.email
+  );
+
+  // Filter subscriptions for current user
+  const userSubscriptions = subscriptions.filter(sub => 
+    !user || sub.customerId === user.id
+  );
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <CustomerLayout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <User className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Sign in to view your account</h2>
+            <p className="text-muted-foreground mb-6">Access your orders, subscriptions, and more</p>
+            <Button asChild>
+              <Link to="/auth">Sign In</Link>
+            </Button>
+          </div>
+        </div>
+      </CustomerLayout>
+    );
+  }
 
   return (
-    <CustomerLayout cartItemCount={0}>
+    <CustomerLayout>
       <div className="bg-muted/30 min-h-screen py-8">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-4 gap-8">
@@ -101,13 +90,13 @@ export default function AccountPage() {
                 <CardContent className="p-6">
                   <div className="text-center mb-6">
                     <Avatar className="w-20 h-20 mx-auto mb-4">
-                      <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
-                      <AvatarFallback>PS</AvatarFallback>
+                      <AvatarImage src={user?.avatar} alt={user?.name} />
+                      <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
                     </Avatar>
-                    <h2 className="font-semibold text-foreground">{mockUser.name}</h2>
-                    <p className="text-sm text-muted-foreground">{mockUser.email}</p>
+                    <h2 className="font-semibold text-foreground">{user?.name}</h2>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
                     <Badge variant="secondary" className="mt-2">
-                      Member since {mockUser.memberSince}
+                      Member since January 2024
                     </Badge>
                   </div>
 
@@ -134,7 +123,10 @@ export default function AccountPage() {
                       </button>
                     ))}
                     <Separator className="my-4" />
-                    <button className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                    >
                       <LogOut className="w-4 h-4" />
                       Logout
                     </button>
@@ -165,19 +157,19 @@ export default function AccountPage() {
                       <div className="grid md:grid-cols-2 gap-6">
                         <div>
                           <label className="text-sm text-muted-foreground">Full Name</label>
-                          <p className="font-medium">{mockUser.name}</p>
+                          <p className="font-medium">{user?.name}</p>
                         </div>
                         <div>
                           <label className="text-sm text-muted-foreground">Email</label>
-                          <p className="font-medium">{mockUser.email}</p>
+                          <p className="font-medium">{user?.email}</p>
                         </div>
                         <div>
                           <label className="text-sm text-muted-foreground">Phone</label>
-                          <p className="font-medium">{mockUser.phone}</p>
+                          <p className="font-medium">{user?.phone || "Not provided"}</p>
                         </div>
                         <div>
                           <label className="text-sm text-muted-foreground">Member Since</label>
-                          <p className="font-medium">{mockUser.memberSince}</p>
+                          <p className="font-medium">January 2024</p>
                         </div>
                       </div>
                     </CardContent>
@@ -239,33 +231,52 @@ export default function AccountPage() {
                       <CardTitle>Order History</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {mockOrders.map((order) => (
-                        <div
-                          key={order.id}
-                          className="p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
-                        >
-                          <div className="flex items-center justify-between mb-3">
-                            <div>
-                              <span className="font-medium">{order.id}</span>
-                              <span className="text-sm text-muted-foreground ml-4">
-                                {order.date}
-                              </span>
-                            </div>
-                            <Badge variant="secondary" className="bg-success/10 text-success">
-                              {order.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {order.items.join(", ")}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold">₹{order.total}</span>
-                            <Button variant="outline" size="sm">
-                              Reorder
-                            </Button>
-                          </div>
+                      {userOrders.length === 0 ? (
+                        <div className="text-center py-8">
+                          <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground">No orders yet</p>
+                          <Button asChild className="mt-4">
+                            <Link to="/menu">Browse Menu</Link>
+                          </Button>
                         </div>
-                      ))}
+                      ) : (
+                        userOrders.map((order) => (
+                          <div
+                            key={order.id}
+                            className="p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <span className="font-medium">{order.id}</span>
+                                <span className="text-sm text-muted-foreground ml-4">
+                                  {order.date}
+                                </span>
+                              </div>
+                              <Badge 
+                                variant="secondary" 
+                                className={
+                                  order.status === "Delivered" ? "bg-success/10 text-success" :
+                                  order.status === "New" ? "bg-info/10 text-info" :
+                                  order.status === "Preparing" ? "bg-warning/10 text-warning" :
+                                  order.status === "Out for Delivery" ? "bg-accent/10 text-accent-foreground" :
+                                  "bg-destructive/10 text-destructive"
+                                }
+                              >
+                                {order.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              {order.items.map(item => item.name).join(", ")}
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold">₹{order.total}</span>
+                              <Button variant="outline" size="sm">
+                                Reorder
+                              </Button>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -273,61 +284,71 @@ export default function AccountPage() {
                 {/* Subscriptions Tab */}
                 {activeTab === "subscriptions" && (
                   <div className="space-y-6">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Active Subscription</CardTitle>
-                        <Badge className="bg-success text-success-foreground">
-                          {mockSubscription.status}
-                        </Badge>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid md:grid-cols-2 gap-6 mb-6">
-                          <div>
-                            <label className="text-sm text-muted-foreground">Plan</label>
-                            <p className="font-medium">{mockSubscription.plan}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Meal Plan</label>
-                            <p className="font-medium">{mockSubscription.mealPlan}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Price</label>
-                            <p className="font-medium">₹{mockSubscription.price}/month</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Next Delivery</label>
-                            <p className="font-medium">{mockSubscription.nextDelivery}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Delivery Days</label>
-                            <p className="font-medium">{mockSubscription.deliveryDays.join(", ")}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted-foreground">Meals Per Day</label>
-                            <p className="font-medium">{mockSubscription.mealsPerDay} meals</p>
-                          </div>
-                        </div>
+                    {userSubscriptions.length === 0 ? (
+                      <Card>
+                        <CardContent className="py-12 text-center">
+                          <RefreshCcw className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground mb-4">No active subscriptions</p>
+                          <Button asChild>
+                            <Link to="/subscriptions">View Plans</Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      userSubscriptions.map((sub) => (
+                        <Card key={sub.id}>
+                          <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>Active Subscription</CardTitle>
+                            <Badge className={
+                              sub.status === "Active" ? "bg-success text-success-foreground" :
+                              sub.status === "Paused" ? "bg-warning text-warning-foreground" :
+                              "bg-destructive text-destructive-foreground"
+                            }>
+                              {sub.status}
+                            </Badge>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid md:grid-cols-2 gap-6 mb-6">
+                              <div>
+                                <label className="text-sm text-muted-foreground">Plan</label>
+                                <p className="font-medium">{sub.plan}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted-foreground">Price</label>
+                                <p className="font-medium">₹{sub.price}/month</p>
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted-foreground">Next Delivery</label>
+                                <p className="font-medium">{sub.nextDelivery}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted-foreground">Delivery Days</label>
+                                <p className="font-medium">{sub.deliveryDays.join(", ")}</p>
+                              </div>
+                            </div>
 
-                        <div className="flex flex-wrap gap-3">
-                          <Button variant="outline">
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Modify Plan
-                          </Button>
-                          <Button variant="outline">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Change Delivery Days
-                          </Button>
-                          <Button variant="outline" className="text-warning">
-                            <Pause className="w-4 h-4 mr-2" />
-                            Pause Subscription
-                          </Button>
-                          <Button variant="outline" className="text-destructive">
-                            <X className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                            <div className="flex flex-wrap gap-3">
+                              <Button variant="outline">
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                Modify Plan
+                              </Button>
+                              <Button variant="outline">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Change Delivery Days
+                              </Button>
+                              <Button variant="outline" className="text-warning">
+                                <Pause className="w-4 h-4 mr-2" />
+                                Pause Subscription
+                              </Button>
+                              <Button variant="outline" className="text-destructive">
+                                <X className="w-4 h-4 mr-2" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
                   </div>
                 )}
 

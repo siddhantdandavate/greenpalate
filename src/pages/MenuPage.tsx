@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Minus, Filter, Search, Flame, Leaf, Dumbbell } from "lucide-react";
+import { Plus, Minus, Search, Flame, Leaf, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/contexts/AppContext";
 
 const categories = [
   { id: "all", label: "All" },
@@ -123,17 +124,12 @@ const menuItems = [
   },
 ];
 
-interface CartItem {
-  id: string;
-  quantity: number;
-}
-
 export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("popular");
-  const [cart, setCart] = useState<CartItem[]>([]);
   const { toast } = useToast();
+  const { cart, addToCart, updateCartQuantity, removeFromCart } = useApp();
 
   const filteredItems = menuItems
     .filter((item) => {
@@ -154,34 +150,33 @@ export default function MenuPage() {
     return item?.quantity || 0;
   };
 
-  const addToCart = (itemId: string) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c.id === itemId);
-      if (existing) {
-        return prev.map((c) => (c.id === itemId ? { ...c, quantity: c.quantity + 1 } : c));
-      }
-      return [...prev, { id: itemId, quantity: 1 }];
+  const handleAddToCart = (item: typeof menuItems[0]) => {
+    addToCart({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      calories: item.calories,
     });
     toast({
       title: "Added to cart",
-      description: "Item has been added to your cart",
+      description: `${item.name} has been added to your cart`,
     });
   };
 
-  const removeFromCart = (itemId: string) => {
-    setCart((prev) => {
-      const existing = prev.find((c) => c.id === itemId);
-      if (existing && existing.quantity > 1) {
-        return prev.map((c) => (c.id === itemId ? { ...c, quantity: c.quantity - 1 } : c));
-      }
-      return prev.filter((c) => c.id !== itemId);
-    });
+  const handleRemoveFromCart = (itemId: string) => {
+    const cartItem = cart.find((c) => c.id === itemId);
+    if (cartItem && cartItem.quantity > 1) {
+      updateCartQuantity(itemId, cartItem.quantity - 1);
+    } else {
+      removeFromCart(itemId);
+    }
   };
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CustomerLayout cartItemCount={totalCartItems}>
+    <CustomerLayout>
       <div className="bg-muted/30 min-h-screen">
         {/* Header */}
         <section className="bg-background border-b border-border py-12">
@@ -294,7 +289,7 @@ export default function MenuPage() {
                             size="icon"
                             variant="outline"
                             className="h-8 w-8"
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => handleRemoveFromCart(item.id)}
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -304,13 +299,13 @@ export default function MenuPage() {
                           <Button
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => addToCart(item.id)}
+                            onClick={() => handleAddToCart(item)}
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </div>
                       ) : (
-                        <Button size="sm" onClick={() => addToCart(item.id)}>
+                        <Button size="sm" onClick={() => handleAddToCart(item)}>
                           <Plus className="w-4 h-4 mr-1" />
                           Add
                         </Button>

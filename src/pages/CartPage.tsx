@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
@@ -12,83 +11,29 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import { useToast } from "@/hooks/use-toast";
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  calories: number;
-}
-
-const initialCartItems: CartItem[] = [
-  {
-    id: "1",
-    name: "Mediterranean Quinoa Bowl",
-    price: 349,
-    quantity: 2,
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100&h=100&fit=crop",
-    calories: 420,
-  },
-  {
-    id: "2",
-    name: "Grilled Chicken Power Bowl",
-    price: 449,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop",
-    calories: 520,
-  },
-  {
-    id: "4",
-    name: "Salmon Poke Bowl",
-    price: 549,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=100&h=100&fit=crop",
-    calories: 480,
-  },
-];
+import { useApp } from "@/contexts/AppContext";
+import { useState } from "react";
 
 const suggestedAddons = [
-  { id: "addon-1", name: "Detox Green Juice", price: 149, image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=80&h=80&fit=crop" },
-  { id: "addon-2", name: "Extra Protein (Chicken)", price: 99, image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=80&h=80&fit=crop" },
-  { id: "addon-3", name: "Fresh Fruit Bowl", price: 129, image: "https://images.unsplash.com/photo-1564093497595-593b96d80180?w=80&h=80&fit=crop" },
+  { id: "addon-1", name: "Detox Green Juice", price: 149, image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=80&h=80&fit=crop", calories: 85 },
+  { id: "addon-2", name: "Extra Protein (Chicken)", price: 99, image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=80&h=80&fit=crop", calories: 120 },
+  { id: "addon-3", name: "Fresh Fruit Bowl", price: 129, image: "https://images.unsplash.com/photo-1564093497595-593b96d80180?w=80&h=80&fit=crop", calories: 95 },
 ];
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+  const { cart, updateCartQuantity, removeFromCart, addToCart } = useApp();
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const updateQuantity = (id: string, delta: number) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-    toast({
-      title: "Item removed",
-      description: "Item has been removed from your cart",
+  const addAddon = (addon: { id: string; name: string; price: number; image: string; calories: number }) => {
+    addToCart({
+      id: addon.id,
+      name: addon.name,
+      price: addon.price,
+      image: addon.image,
+      calories: addon.calories,
     });
-  };
-
-  const addAddon = (addon: { id: string; name: string; price: number; image: string }) => {
-    const existing = cartItems.find((item) => item.id === addon.id);
-    if (existing) {
-      updateQuantity(addon.id, 1);
-    } else {
-      setCartItems((prev) => [
-        ...prev,
-        { ...addon, quantity: 1, calories: 150 },
-      ]);
-    }
     toast({
       title: "Added to cart",
       description: `${addon.name} has been added`,
@@ -112,14 +57,14 @@ export default function CartPage() {
     setCouponCode("");
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = appliedCoupon === "FIRST20" ? subtotal * 0.2 : 0;
   const deliveryFee = subtotal >= 500 ? 0 : 49;
   const total = subtotal - discount + deliveryFee;
 
-  if (cartItems.length === 0) {
+  if (cart.length === 0) {
     return (
-      <CustomerLayout cartItemCount={0}>
+      <CustomerLayout>
         <div className="min-h-[60vh] flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -143,7 +88,7 @@ export default function CartPage() {
   }
 
   return (
-    <CustomerLayout cartItemCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)}>
+    <CustomerLayout>
       <div className="bg-muted/30 min-h-screen py-8">
         <div className="container mx-auto px-4">
           <motion.h1
@@ -157,7 +102,7 @@ export default function CartPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
-              {cartItems.map((item, index) => (
+              {cart.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -168,7 +113,7 @@ export default function CartPage() {
                     <CardContent className="p-4">
                       <div className="flex gap-4">
                         <img
-                          src={item.image}
+                          src={item.image || "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100&h=100&fit=crop"}
                           alt={item.name}
                           className="w-20 h-20 rounded-lg object-cover"
                         />
@@ -184,7 +129,7 @@ export default function CartPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.id)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -193,7 +138,7 @@ export default function CartPage() {
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => updateQuantity(item.id, -1)}
+                              onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
@@ -201,7 +146,7 @@ export default function CartPage() {
                             <Button
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => updateQuantity(item.id, 1)}
+                              onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
