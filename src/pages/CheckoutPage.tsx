@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Check,
   CreditCard,
@@ -19,9 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CustomerLayout } from "@/components/layout/CustomerLayout";
 import { useToast } from "@/hooks/use-toast";
+import { useApp } from "@/contexts/AppContext";
 
 const deliverySlots = [
   { id: "morning", label: "Morning", time: "7:00 AM - 10:00 AM" },
@@ -43,11 +43,13 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage() {
+  const navigate = useNavigate();
+  const { cart, clearCart, addOrder, user, isAuthenticated } = useApp();
   const [currentStep, setCurrentStep] = useState(1);
   const [deliveryDetails, setDeliveryDetails] = useState({
-    name: "",
-    phone: "",
-    email: "",
+    name: user?.name || "",
+    phone: user?.phone || "",
+    email: user?.email || "",
     address: "",
     city: "",
     pincode: "",
@@ -56,19 +58,48 @@ export default function CheckoutPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [orderType, setOrderType] = useState("one-time");
   const [paymentMethod, setPaymentMethod] = useState("upi");
-  const [couponApplied] = useState(true);
+  const [couponApplied] = useState(false);
   const { toast } = useToast();
 
-  const subtotal = 1696;
-  const discount = couponApplied ? 339 : 0;
-  const deliveryFee = 0;
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discount = couponApplied ? subtotal * 0.2 : 0;
+  const deliveryFee = subtotal >= 500 ? 0 : 49;
   const total = subtotal - discount + deliveryFee;
 
   const handlePlaceOrder = () => {
+    if (cart.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Please add items to your cart before checkout",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create the order
+    addOrder({
+      customerId: user?.id || "guest",
+      customerName: deliveryDetails.name || "Guest",
+      customerEmail: deliveryDetails.email || "guest@example.com",
+      items: cart,
+      total,
+      status: "New",
+      address: `${deliveryDetails.address}, ${deliveryDetails.city} - ${deliveryDetails.pincode}`,
+      paymentMethod: paymentMethod.toUpperCase(),
+    });
+
+    // Clear the cart
+    clearCart();
+
     toast({
       title: "Order Placed Successfully! 🎉",
       description: "You will receive a confirmation email shortly.",
     });
+
+    // Navigate to account/orders
+    setTimeout(() => {
+      navigate("/account");
+    }, 1500);
   };
 
   const steps = [
@@ -78,8 +109,24 @@ export default function CheckoutPage() {
     { id: 4, label: "Payment", icon: CreditCard },
   ];
 
+  if (cart.length === 0) {
+    return (
+      <CustomerLayout showAnnouncement={false}>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Your cart is empty</h2>
+            <p className="text-muted-foreground mb-6">Add items to your cart before checkout</p>
+            <Button asChild>
+              <Link to="/menu">Browse Menu</Link>
+            </Button>
+          </div>
+        </div>
+      </CustomerLayout>
+    );
+  }
+
   return (
-    <CustomerLayout cartItemCount={4} showAnnouncement={false}>
+    <CustomerLayout showAnnouncement={false}>
       <div className="bg-muted/30 min-h-screen py-8">
         <div className="container mx-auto px-4">
           {/* Progress Steps */}
@@ -373,7 +420,7 @@ export default function CheckoutPage() {
                           Back
                         </Button>
                         <Button className="flex-1" size="lg" onClick={handlePlaceOrder}>
-                          Place Order - ₹{total}
+                          Place Order - ₹{total.toFixed(0)}
                         </Button>
                       </div>
                     </CardContent>
@@ -390,18 +437,12 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Mediterranean Quinoa Bowl × 2</span>
-                      <span>₹698</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Grilled Chicken Power Bowl × 1</span>
-                      <span>₹449</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Salmon Poke Bowl × 1</span>
-                      <span>₹549</span>
-                    </div>
+                    {cart.map((item) => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{item.name} × {item.quantity}</span>
+                        <span>₹{item.price * item.quantity}</span>
+                      </div>
+                    ))}
                   </div>
 
                   <Separator />
@@ -413,13 +454,13 @@ export default function CheckoutPage() {
                     </div>
                     {discount > 0 && (
                       <div className="flex justify-between text-success">
-                        <span>Discount (FIRST20)</span>
-                        <span>-₹{discount}</span>
+                        <span>Discount</span>
+                        <span>-₹{discount.toFixed(0)}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Delivery</span>
-                      <span className="text-success">FREE</span>
+                      <span>{deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}</span>
                     </div>
                   </div>
 
@@ -427,7 +468,7 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>₹{total}</span>
+                    <span>₹{total.toFixed(0)}</span>
                   </div>
                 </CardContent>
               </Card>

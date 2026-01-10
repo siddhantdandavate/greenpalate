@@ -29,8 +29,18 @@ import CookiesPage from "./pages/CookiesPage";
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
 import AdminMenu from "./pages/admin/AdminMenu";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminDelivery from "./pages/admin/AdminDelivery";
 import AdminMarketing from "./pages/admin/AdminMarketing";
+import AdminInventory from "./pages/admin/AdminInventory";
+import AdminReviews from "./pages/admin/AdminReviews";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminSupport from "./pages/admin/AdminSupport";
+import AdminStaff from "./pages/admin/AdminStaff";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 import NotFound from "./pages/NotFound";
 
@@ -78,8 +88,18 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
             <Route path="/admin/menu" element={<AdminMenu />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/delivery" element={<AdminDelivery />} />
             <Route path="/admin/marketing" element={<AdminMarketing />} />
+            <Route path="/admin/inventory" element={<AdminInventory />} />
+            <Route path="/admin/reviews" element={<AdminReviews />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/support" element={<AdminSupport />} />
+            <Route path="/admin/staff" element={<AdminStaff />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
