@@ -104,6 +104,14 @@ export default {
           from: { transform: "translateY(-100%)" },
           to: { transform: "translateY(0)" },
         },
+        "bounce-gentle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-15px)" },
+        },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(0) rotate(-3deg)" },
+          "50%": { transform: "translateY(-20px) rotate(3deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -112,6 +120,8 @@ export default {
         "fade-up": "fade-up 0.6s ease-out",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "slide-down": "slide-down 0.3s ease-out",
+        "bounce-gentle": "bounce-gentle 3s ease-in-out infinite",
+        "bounce-slow": "bounce-slow 4s ease-in-out infinite",
       },
     },
   },

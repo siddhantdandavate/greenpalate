@@ -14,9 +14,10 @@ import {
   HeadphonesIcon,
   UserCog,
   Settings,
-  Leaf,
+  ExternalLink,
   ChevronDown,
 } from "lucide-react";
+import satvikLogo from "@/assets/satvik-salad-logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -94,12 +95,10 @@ export function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link to="/admin" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <Leaf className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img src={satvikLogo} alt="Sathvik Salad" className="w-8 h-8 rounded-lg shrink-0 object-contain" />
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-display font-bold text-sm">Healthy Greens</span>
+              <span className="font-display font-bold text-sm">Sathvik Salad</span>
               <span className="text-xs text-muted-foreground">Admin Console</span>
             </div>
           )}
@@ -143,6 +142,26 @@ export function AdminSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map(renderMenuItem)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Back to Website */}
+        <SidebarGroup className="mt-auto border-t border-sidebar-border pt-4">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={collapsed ? "Back to Website" : undefined}
+                  className="text-primary hover:bg-primary/10"
+                >
+                  <Link to="/" className="flex items-center gap-3">
+                    <ExternalLink className="h-4 w-4 shrink-0" />
+                    {!collapsed && <span>Back to Website</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
