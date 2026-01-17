@@ -116,24 +116,26 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-background to-muted py-20 lg:py-32">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%)]" />
         
-        {/* Floating Sandwich - Left */}
+        {/* Floating Sandwich - Left with Bouncy Effect */}
         <motion.img
           src={floatingSandwich}
           alt=""
-          className="absolute left-0 top-1/3 w-32 md:w-48 lg:w-64 opacity-90 -translate-x-1/4"
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 0.9 }}
+          className="absolute left-0 top-1/3 w-32 md:w-48 lg:w-64 opacity-90 -translate-x-1/4 animate-bounce-slow"
+          initial={{ x: -100, opacity: 0, rotate: -10 }}
+          animate={{ x: 0, opacity: 0.9, rotate: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
+          style={{ filter: "drop-shadow(0 20px 30px rgba(0,0,0,0.2))" }}
         />
         
-        {/* Floating Bowl - Right */}
+        {/* Floating Bowl - Right with Bouncy Effect */}
         <motion.img
           src={floatingBowl}
           alt=""
-          className="absolute right-0 top-1/4 w-32 md:w-48 lg:w-64 opacity-90 translate-x-1/4"
-          initial={{ x: 100, opacity: 0 }}
-          animate={{ x: 0, opacity: 0.9 }}
+          className="absolute right-0 top-1/4 w-32 md:w-48 lg:w-64 opacity-90 translate-x-1/4 animate-bounce-gentle"
+          initial={{ x: 100, opacity: 0, rotate: 10 }}
+          animate={{ x: 0, opacity: 0.9, rotate: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
+          style={{ filter: "drop-shadow(0 20px 30px rgba(0,0,0,0.2))" }}
         />
         
         <div className="container mx-auto px-4 relative z-10">
